@@ -2,6 +2,7 @@ package com.chatApp.sp.listener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
@@ -22,19 +23,20 @@ public class WebSocketEventListener {
 		logger.info("Receive a new websocket connection");
 	}
 	
-	@EventListener
-	public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
-		
-		StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-		
-		String username = (String) headerAccessor.getSessionAttributes().get("username");
-		
-		
-		WebSocketController.activeUser.remove(username);
-		
-		if(username != null) {
-			logger.info("User Disconnected: "+username);
-		}
-	}
+	 @EventListener
+	    public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
+	        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+	 
+	        String username = (String) headerAccessor.getSessionAttributes().get("username");
+	        logger.info("someone has disconnected!");
+	         
+	        if(username != null) {
+	            logger.info("User Disconnected : " + username);
+	            
+	            WebSocketController.activeUser.remove(username);
+	 
+	            WebSocketController.simpMessagingTemplate.convertAndSend("/topic/disconnect", username);
+	        }
+	    }
 
 }

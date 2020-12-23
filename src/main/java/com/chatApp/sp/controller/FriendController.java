@@ -54,7 +54,7 @@ public class FriendController {
 	
 	//gửi lời mời kết bạn +
 	@PostMapping("/friends/add")
-	public String sendFriendRequest(@RequestParam("friendEmail") String friendEmail, @RequestParam("email") String email,HttpServletRequest req) throws Exception {
+	public String sendFriendRequest(@RequestParam("friendEmail") String friendEmail,HttpServletRequest req) throws Exception {
 		return friendServices.sendFriendRequest(friendEmail, req);
 	}
 	@PostMapping("/app/friends/add")
@@ -79,7 +79,7 @@ public class FriendController {
 		return friendServices.removeFriend(friendEmail, req);
 	}
 	@DeleteMapping("/app/friends/remove")
-	public String appRemoveFriend(@RequestParam("friendEmail") String friendEmail, @RequestHeader("email") String email) throws Exception {
+	public String appRemoveFriend(@RequestHeader("friendEmail") String friendEmail, @RequestHeader("email") String email) throws Exception {
 		return friendServices.removeFriend(friendEmail, email);
 	}
 	

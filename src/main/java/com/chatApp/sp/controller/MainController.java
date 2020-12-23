@@ -39,8 +39,14 @@ public class MainController {
 	
 	@GetMapping("/upload")
 	@ResponseBody
-	public String huhu() throws UploadErrorException, DbxException, IOException {
+	public String uploadFile() throws UploadErrorException, DbxException, IOException {
 		DropboxServices.getFiles();
 		return "upload";
+	}
+	
+	@GetMapping("/start")
+	@ResponseBody
+	public String start() {
+		return "The server is running";
 	}
 }

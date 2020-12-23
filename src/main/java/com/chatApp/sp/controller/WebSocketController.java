@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.annotation.SendToUser;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -35,7 +36,7 @@ import com.dropbox.core.v2.files.UploadErrorException;
 @Controller
 @CrossOrigin
 public class WebSocketController {
-  private static SimpMessagingTemplate simpMessagingTemplate;
+  public static SimpMessagingTemplate simpMessagingTemplate;
   
   @Autowired
   private MessageServices messageServices;
@@ -53,9 +54,11 @@ public class WebSocketController {
   // add an user to connected user list
   @MessageMapping("/register")  
   @SendToUser("/queue/newMember")
-  public Set<String> registerUser(String webChatUsername){
+  public Set<String> registerUser(String webChatUsername, SimpMessageHeaderAccessor headerAccessor){
 	  System.out.println("webSocketController: new connect "+ webChatUsername);
     if(!activeUser.contains(webChatUsername)) {
+    	// Add username in web socket session
+        headerAccessor.getSessionAttributes().put("username", webChatUsername);
     	activeUser.add(webChatUsername);
       simpMessagingTemplate.convertAndSend("/topic/newMember", webChatUsername); 
       return activeUser;
@@ -135,19 +138,19 @@ public class WebSocketController {
   
   //send image message
   @PostMapping("/messages/img")
+  @ResponseBody
   public String uploadImage(@RequestParam("image") MultipartFile image, 
-		  		   //@RequestParam("sender") String sender,
-		  		   //@RequestParam("recipient") String recipient,
-		  		   //@RequestParam("type") String type,
-		  		   //@RequestParam("mesType") String mesType
-		  		   @RequestParam("name") String name) throws UploadErrorException, DbxException, IOException {
+		  		   @RequestParam("sender") String sender,
+		  		   @RequestParam("recipient") String recipient,
+		  		   @RequestParam("type") String type,
+		  		   @RequestParam("mesType") String mesType) throws UploadErrorException, DbxException, IOException {
 	  
 	String url = DropboxServices.uploadFile(image.getInputStream(), image.getOriginalFilename());
 	
-	//MessageTemplate mes = new MessageTemplate(sender, recipient, url, type, mesType);
+	MessageTemplate mes = new MessageTemplate(sender, recipient, url, type, mesType);
 	
-	//messageServices.sendMessage(mes);
-	return url+"_____"+name;
+	messageServices.sendMessage(mes);
+	return url;
   }
   
 }

@@ -4,6 +4,7 @@ form.addEventListener('submit', (event) =>{
   event.preventDefault();
 
   var data = new FormData(form);
+  data.append("name", 'khang');
 
   $.ajax({
         type: "POST",

@@ -1,12 +1,16 @@
 package com.chatApp.sp.utils;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.chatApp.sp.model.DBGroup;
 import com.chatApp.sp.model.DBUser;
+import com.chatApp.sp.repository.GroupRepository;
 import com.chatApp.sp.repository.UserRepository;
 import com.chatApp.sp.service.CookieServices;
 
@@ -15,6 +19,9 @@ public class UserUtils {
 
 	@Autowired
 	UserRepository userRepo;
+	
+	@Autowired
+	GroupRepository groupRepo;
 	
 	@Autowired
 	BCryptPasswordEncoder passwordEncoder;
@@ -62,6 +69,26 @@ public class UserUtils {
 			}
 			if(userName != null && !userName.equals("")) {
 				user.setUserName(userName);
+				Map<String, String> friends = user.getFriend();
+				
+				for(Map.Entry<String, String> f: friends.entrySet()) {
+					DBUser other =  userRepo.findByEmail(f.getKey());
+					Map<String,String> friend = other.getFriend();
+					friend.put(user.getEmail(), userName);
+					other.setFriend(friend);
+					userRepo.save(other);
+				}
+				
+				Map<String, String> groups = user.getGroup();
+				
+				for(Map.Entry<String, String> g: groups.entrySet()) {
+					DBGroup other =  groupRepo.findByGroupId(g.getKey());
+					Map<String, String> members = other.getMembers();
+					members.put(user.getEmail(), userName);
+					other.setMembers(members);
+					groupRepo.save(other);
+				}
+				
 				System.out.println("userName changed");
 			}
 			if(age != null && !age.equals("")) {
@@ -89,6 +116,25 @@ public class UserUtils {
 			}
 			if(userName != null && !userName.equals("")) {
 				user.setUserName(userName);
+				Map<String, String> friends = user.getFriend();
+				
+				for(Map.Entry<String, String> f: friends.entrySet()) {
+					DBUser other =  userRepo.findByEmail(f.getKey());
+					Map<String,String> friend = other.getFriend();
+					friend.put(user.getEmail(), userName);
+					other.setFriend(friend);
+					userRepo.save(other);
+				}
+				
+				Map<String, String> groups = user.getGroup();
+				
+				for(Map.Entry<String, String> g: groups.entrySet()) {
+					DBGroup other =  groupRepo.findByGroupId(g.getKey());
+					Map<String, String> members = other.getMembers();
+					members.put(user.getEmail(), userName);
+					other.setMembers(members);
+					groupRepo.save(other);
+				}
 				System.out.println("userName changed");
 			}
 			if(age != null && !age.equals("")) {
