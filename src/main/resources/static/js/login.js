@@ -208,6 +208,7 @@ loginForm.addEventListener('submit', e => {
        success: function(output, status, res) {
          closeLoading();
          notiMessage("Login successfully!");
+         location.replace("https://chatapp-kkt.herokuapp.com/main");
        },
        error: () =>{
          closeLoading();
