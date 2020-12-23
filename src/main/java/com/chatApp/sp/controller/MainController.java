@@ -44,6 +44,11 @@ public class MainController {
 		return "upload";
 	}
 	
+	@GetMapping("/main")
+	public String main() {
+		return "main";
+	}
+	
 	@GetMapping("/start")
 	@ResponseBody
 	public String start() {

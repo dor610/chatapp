@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" th:href="@{css/main.css}">
+
+  <link rel="stylesheet" th:href="@{https://use.fontawesome.com/releases/v5.3.1/css/all.css}">
+  <meta name="viewport" content="width=device-width,height=device-height, initial-scale=1.0">
+
+  <link rel="stylesheet" th:href="@{https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous}">
+  <title>Chat App</title>
+  <script>
+    const x = screen.height + "px";
+  </script>
+
+</head>
+
+<body onoffline="setStatus('offline')" ononline="setStatus('online')">
+  <div id="root">
+    <!--Lớp làm mờ-->
+    <div class="overlay" style=" display: none"></div>
+    <!--Cảnh báo-->
+    <div id="warn-box" class="box-hidden warn display-none">
+      <div>
+        You want to sign out of this account</div>
+      <div>
+        <button class="cancelbtn" onclick="offPlayout('warn-box','display-none',1)">Cancel</button>
+        <button class='ok' onclick="onLogout()">Accept</button>
+      </div>
+
+    </div>
+    <div class="main-box">
+      <div class="aside">
+        <!-- Thanh trạng thái -->
+        <div class="status-user-box">
+          <div class="picture"></div>
+          <div>
+            <div id="nameUser"></div>
+            <div id="status"> Online</div>
+          </div>
+        </div>
+        <!-- thanh search  -->
+        <div class="search-box">
+          <form method="post" id="id-search-friend">
+            <input type="text" placeholder="Tìm kiếm bạn bè" name="emailSearch"></input>
+          </form>
+        </div>
+        <!--Hiển thị danh sách-->
+        <div class="box-list">
+
+          <ul class="list-friend" style="display:grid">
+          </ul>
+          <!--Nút Thêm Nhóm-->
+          <div id="btnAddGroup" class="display-none">
+            <button class="btn_Menu" onclick="onDisplayPlayout('menuAdd','display-none',0)"><i class="fas fa-plus"></i></button>
+            <div class="menu-add display-none" id="menuAdd">
+              <button onclick="onDisplayPlayout('frmAddGroup','display-none',1)">Thêm nhóm</button>
+              <button onclick="onDisplayPlayout('frmAddFriend','display-none',1)">Thêm bạn</button>
+
+            </div>
+          </div>
+          <!-- end -->
+          <!-- form thông tin người dùng -->
+          <div class="box-info-user" style="display: none">
+            <div class="info">
+              <div class="picture"></div>
+            </div>
+            <div class="info" id="myName"></div>
+            <div class="info" id="myAge"></div>
+            <div class="info" id="myGender"></div>
+            <div class="info" id="myEmail"></div>
+            <div class="info"><button onclick="onDisplayFormUpdate()">Edit your information</button></div>
+            <div class="info"><button onclick="onDisplayPlayout('warn-box','display-none',1)">Logout</button></div>
+            <div><button> Delete the account</button></div>
+          </div>
+        </div>
+        <!-- menu chức năng  -->
+        <div class="menu">
+          <button class='btn_Menu' onclick="onDisplayListChat()">
+            <i class="far fa-comment-dots"></i>
+            <span>List Chatting</span>
+          </button>
+          <button class='btn_Menu' onclick="displayReceiveListRequest(this)">
+            <i class="fas fa-user-plus"></i>
+            <span>Request</span>
+          </button>
+
+          <button class='btn_Menu' onclick="displayListGroup(this)">
+            <i class="fas fa-users"></i>
+            <span>Group</span>
+          </button>
+
+          <button class='btn_Menu' onclick="displayListFriend(this)">
+            <i class="fas fa-user-friends"></i>
+            <span>Friend</span>
+          </button>
+          <button class='btn_Menu' onclick="displayProfile()">
+            <i class="fas fa-id-card"></i>
+            <span>Setting</span>
+          </button>
+        </div>
+      </div>
+      <!-- Khung thêm nhóm chat -->
+      <div class="box-hidden display-none" id="frmAddGroup">
+        <form id="id-add-group">
+          <h2>Create a group</h2>
+          <label for="">Group name:</label>
+          <input type="text" name="newGroupName" placeholder="Group name">
+
+          <hr>
+          <button class="cancelbtn" type="reset" onclick="offPlayout('frmAddGroup','display-none',1)">Cancel</button>
+          <button type="submit" class="ok">OK</button>
+          <hr>
+        </form>
+      </div>
+      <!-- end -->
+      <!-- Khung thêm bạn -->
+      <div class="box-hidden display-none" id="frmAddFriend">
+        <form id="id-add-friend">
+          <h2>Add new Friend </h2>
+          <label for="">Enter email:</label>
+          <input type="text" name="friendEmail" placeholder="Email">
+
+          <hr>
+          <button class="cancelbtn" type="reset" onclick="offPlayout('frmAddFriend','display-none',1)">Cancel</button>
+          <button type="submit" class="ok">Ok</button>
+          <hr>
+        </form>
+      </div>
+      <!-- end -->
+      <!-- hiển thị thông tin ban chát -->
+      <div class="parent-form-update display-none" id="wrapperInfo">
+        <div id="inforFriend" class="form-info-friend">
+
+
+        </div>
+      </div>
+      <!-- form thêm member -->
+      <div id='idAddMember' class="box-hidden alert-box display-none">
+        <form id="frmAddMember">
+          <label for="addMember">Add new Member</label>b
+          <hr>
+          <input type="text" name="friendEmail" placeholder="Nhập email của member">
+          <hr>
+          <button type="reset" onclick="offPlayout('idAddMember','display-none')" class="cancelbtn">Cancel</button>
+          <button type="submit">Add </button>
+        </form>
+      </div>
+      <!-- form xóa member -->
+      <div id='idDeleteMember' class="box-hidden alert-box display-none">
+        <form id="frmDeleteMember">
+          <label for="member">Delete Member</label>
+          <hr>
+          <input type="text" name="member" placeholder="Enter member's email">
+          <hr>
+          <button type="reset" onclick="offPlayout('idDeleteMember','display-none')" class="cancelbtn">Cancel</button>
+          <button type="submit">Delete</button>
+
+        </form>
+      </div>
+      <!-- phần chat-->
+      <div class="chatBox " id="khungchat">
+        <div class="headerBox">
+          <button class="iconBox" onclick="offDislayChat()"><i class="fas fa-arrow-left"></i></button>
+          <div class="title-box">Choose your friends to chat with</div>
+          <button class="iconBox infor" id="btnDisplayInfo">
+            <i class=" fas fa-ellipsis-h"></i>
+          </button>
+        </div>
+        <!-- khung hiển thị tin nhắn  -->
+        <div class="wrap-box-chat">
+          <div class="box-chat">
+            <!-- danh sách tin nhắn sẽ chèn vào đây -->
+          </div>
+        </div>
+        <div class="input-box">
+          <div class="custum">
+            <form method="post" enctype="multipart/form-data" id="image_upload_form">
+              <input type="file" name="image" id="images" multiple accept="image/x-png, image/gif, image/jpeg, image/jpg" />
+              <button type="submit" id="btn"><i class="far fa-file-image"></i></button>
+            </form>
+          </div>
+          <div>
+            <input type="text" name="message" id="message" placeholder="Enter a message to send">
+            <button type="button" id="send" style="width: 4rem;"><i class="fas fa-paper-plane"></i></button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!--Thanh điều hướng và tìm kiếm-->
+    <div class="footer">
+      <nav class="nav_box">
+        <div class="logo">
+          <img class="picture" th:src="@{/img/favicon.ico}" style="background: none;background-size: 90%;"></img>
+          <div>
+            <h3>chatApp</h3>
+          </div>
+          <div>Version: 1.0.0</div>
+        </div>
+        <div class="flex-grow-1">
+        </div>
+      </nav>
+    </div>
+    <!-- end-NAV-search -->
+    <!--khung chỉnh sửa thông tin người dùng-->
+    <div class="box-hidden fromUpdate" style="display: none">
+      <form style="border:1px solid #ccc" method="POST" id="id-frm-updata-info">
+        <div class="wrap">
+          <h2>Edit personal information </h2>
+          <hr>
+          <label for="userName"><b>User name</b>
+          </label>
+          <input type="text" name="editUserName" value="">
+          <br>
+          <label for="age"><b>Your Age</b>
+          </label>
+          <input type="text" name="editAge" value="">
+          <br>
+          <label for="psw-repeat"><b>Password</b>
+            <input type="password" placeholder="Password" name="editPassword" value="">
+          </label>
+          <br>
+          <hr>
+          <div class="clearfix">
+            <button type="button" class="cancelbtn" onclick="offDisplayFormUpdate()">Cancel</button>
+            <button type="submit" class="ok">Update</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div id="listMember" class="box-hiden parent-form-update display-none">
+    </div>
+    <!-- end  -->
+  </div>
+  <!--Boostrap-->
+  <!-- <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous">
+    </script> -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous">
+    </script> -->
+  <!-- Main js -->
+  <script th:src="@{https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js}"></script>
+
+  <!-- chat -->
+  <script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js" integrity="sha512-5yJ548VSnLflcRxWNqVWYeQZnby8D8fJTmYRLyvs445j1XmzR8cnWi85lcHx3CUEeAX+GrK3TqTfzOO6LKDpdw==" crossorigin="anonymous}"></script>
+  <script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js" integrity="sha512-iKDtgDyTHjAitUDdLljGhenhPwrbBfqTKWO1mkhSFH3A7blITC9MhYon6SjnMhp4o0rADGw9yAC6EW4t5a4K3g==" crossorigin="anonymous}"></script>
+  <script th:src="@{/js/event.js}"></script>
+  <script th:src="@{/js/display.js}"></script>
+  <script th:src="@{/js/event.js}"></script>
+  <script th:src="@{/js/eventGroup.js}"></script>
+  <script th:src="@{/js/friend.js}"></script>
+  <script th:src="@{/js/get.js}"></script>
+  <script th:src="@{/js/insertInfo.js}"></script>
+  <script th:src="@{/js/saveMessage.js}"></script>
+  <script th:src="@{/js/socket.js}"></script>
+  <script th:src="@{/js/user.js}"></script>
+  <script th:src="@{/}"></script>
+  <!-- <script src="js/main.js"></script> -->
+  <script th:src="@{/js/sentImage.js}"></script>
+</body>
+
+</html>
